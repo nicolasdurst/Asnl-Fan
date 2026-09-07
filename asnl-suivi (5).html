@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ASNL — Suivi personnalisé</title>
+<style>
+  :root{
+    --rouge: #C8102E;
+    --rouge-fonce: #8C0B20;
+    --creme: #F7F4EE;
+    --encre: #1B1B1B;
+    --gris: #6B6B66;
+    --ligne: #E4DFD3;
+    --or: #C9A24B;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--creme);
+    color:var(--encre);
+    font-family: "Georgia", "Iowan Old Style", serif;
+    line-height:1.5;
+  }
+  header{
+    background: var(--rouge);
+    background-image: linear-gradient(135deg, var(--rouge) 0%, var(--rouge-fonce) 100%);
+    color:#fff;
+    padding: 28px 20px 22px;
+    text-align:center;
+    border-bottom: 4px solid var(--or);
+  }
+  header h1{
+    margin:0;
+    font-size: 1.9rem;
+    letter-spacing: 0.5px;
+    font-weight: 700;
+  }
+  header p{
+    margin: 6px 0 0;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 0.82rem;
+    opacity: 0.85;
+  }
+  nav{
+    display:flex;
+    justify-content:center;
+    gap: 2px;
+    background:#fff;
+    border-bottom: 1px solid var(--ligne);
+    position: sticky;
+    top:0;
+    z-index: 10;
+    overflow-x:auto;
+  }
+  nav button{
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    border:none;
+    background:none;
+    padding: 14px 16px;
+    font-size: 0.85rem;
+    color: var(--gris);
+    cursor:pointer;
+    border-bottom: 3px solid transparent;
+    white-space:nowrap;
+  }
+  nav button.actif{
+    color: var(--rouge);
+    border-bottom-color: var(--rouge);
+    font-weight:600;
+  }
+  main{
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 22px 18px 60px;
+  }
+  section{display:none;}
+  section.actif{display:block; animation: apparition 0.25s ease;}
+  @keyframes apparition{ from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:translateY(0);} }
+
+  h2{
+    font-size:1.25rem;
+    margin: 0 0 4px;
+    color: var(--rouge-fonce);
+  }
+  .soustitre{
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 0.78rem;
+    color: var(--gris);
+    margin-bottom:18px;
+  }
+
+  .carte{
+    background:#fff;
+    border:1px solid var(--ligne);
+    border-radius: 6px;
+    padding: 18px;
+    margin-bottom: 16px;
+  }
+  .match-vs{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    font-size:1.05rem;
+    font-weight:700;
+    margin-bottom:6px;
+  }
+  .match-date{
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size:0.8rem;
+    color: var(--gris);
+  }
+  .badge{
+    display:inline-block;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size:0.7rem;
+    background: var(--rouge);
+    color:#fff;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-top:6px;
+  }
+  .badge.domicile{ background: var(--or); color: var(--encre); }
+
+  table{
+    width:100%;
+    border-collapse: collapse;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 0.82rem;
+  }
+  th, td{
+    text-align:left;
+    padding: 8px 6px;
+    border-bottom: 1px solid var(--ligne);
+  }
+  th{
+    font-size:0.7rem;
+    text-transform:uppercase;
+    letter-spacing:0.03em;
+    color: var(--gris);
+  }
+  tr.nancy{
+    background: #FCEFEF;
+    font-weight:700;
+  }
+  td.pts{ font-weight:700; }
+  .note{
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 0.75rem;
+    color: var(--gris);
+    margin-top: 10px;
+    font-style: italic;
+  }
+
+  .ligne-histoire{
+    display:flex;
+    gap:14px;
+    margin-bottom: 14px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--ligne);
+  }
+  .ligne-histoire:last-child{ border-bottom:none; }
+  .annee{
+    font-weight:700;
+    color: var(--rouge);
+    min-width: 52px;
+    font-size:0.95rem;
+  }
+  .titres{
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 0.8rem;
+    color: var(--gris);
+    line-height:1.6;
+  }
+  .titres strong{ color: var(--encre); }
+
+  .groupe-titre{
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 0.72rem;
+    text-transform:uppercase;
+    letter-spacing: 0.06em;
+    color: var(--rouge-fonce);
+    margin: 20px 0 8px;
+  }
+  .groupe-titre:first-child{ margin-top:0; }
+  .joueur{
+    display:flex;
+    justify-content:space-between;
+    padding: 7px 0;
+    border-bottom: 1px dotted var(--ligne);
+    font-size: 0.9rem;
+  }
+  .joueur span.age{
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 0.78rem;
+    color: var(--gris);
+  }
+
+  footer{
+    text-align:center;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 0.72rem;
+    color: var(--gris);
+    padding: 20px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>AS Nancy Lorraine</h1>
+  <p>Suivi personnalisé — Ligue 2 BKT 2026/2027</p>
+</header>
+
+<nav>
+  <button class="actif" data-cible="prochain-match">Prochain match</button>
+  <button data-cible="classement">Classement</button>
+  <button data-cible="histoire">Palmarès &amp; histoire</button>
+  <button data-cible="effectif">Effectif</button>
+</nav>
+
+<main>
+
+  <!-- PAGE 1 : PROCHAIN MATCH -->
+  <section id="prochain-match" class="actif">
+    <h2>Prochain match</h2>
+    <p class="soustitre">Mise à jour du 7 septembre 2026, 22h — match en cours / résultat pas encore disponible</p>
+
+    <div class="carte">
+      <div class="match-vs"><span>FC Nantes</span><span>—</span><span>Nancy</span></div>
+      <div class="match-date">Ce soir, lundi 7 septembre 2026 · 20h45 · Stade de la Beaujoire</div>
+      <span class="badge">Journée 5 · Extérieur · Diffusion : beIN Sports 1</span>
+      <p style="font-family:-apple-system,sans-serif;font-size:0.85rem;margin-top:12px;">
+        C'est l'affiche de clôture de la 5<sup>e</sup> journée. Grégory Poirier (nommé le 25 août, en remplacement de Michel Der Zakarian) dispute son 2<sup>e</sup> match sur le banc nantais, toujours à la recherche d'une première victoire. En face, Nancy aborde la rencontre sans complexe : meilleure défense du championnat (1 seul but encaissé en 4 matchs) sous la houlette d'Oswald Tanchot, arrivé le 1<sup>er</sup> juillet. Le score n'était pas encore disponible au moment de cette recherche — redemandez une mise à jour un peu plus tard pour l'obtenir.
+      </p>
+    </div>
+
+    <div class="groupe-titre">Puis à suivre</div>
+    <div class="carte">
+      <div class="match-vs"><span>Nancy</span><span>—</span><span>Stade de Reims</span></div>
+      <div class="match-date">Vendredi 11 septembre 2026 · Stade Marcel-Picot</div>
+      <span class="badge domicile">Journée 6 · Domicile</span>
+    </div>
+    <div class="carte">
+      <div class="match-vs"><span>Rodez</span><span>—</span><span>Nancy</span></div>
+      <div class="match-date">Vendredi 18 septembre 2026</div>
+      <span class="badge">Journée 7 · Extérieur</span>
+    </div>
+
+    <div class="groupe-titre">Les 4 derniers résultats</div>
+    <div class="carte">
+      <div class="match-vs"><span>Nancy</span><span>0 – 0</span><span>Boulogne</span></div>
+      <div class="match-date">Stade Marcel-Picot · Journée 1</div>
+    </div>
+    <div class="carte">
+      <div class="match-vs"><span>Nancy</span><span>0 – 1</span><span>Montpellier</span></div>
+      <div class="match-date">Stade Marcel-Picot · Journée 2</div>
+    </div>
+    <div class="carte">
+      <div class="match-vs"><span>Pau</span><span>0 – 1</span><span>Nancy</span></div>
+      <div class="match-date">Journée 3</div>
+    </div>
+    <div class="carte">
+      <div class="match-vs"><span>Nancy</span><span>2 – 0</span><span>Dunkerque</span></div>
+      <div class="match-date">Stade Marcel-Picot · Journée 4 · Dunkerque a terminé à 10</div>
+    </div>
+
+    <p class="note">Cette page ne s'actualise pas automatiquement. Redemandez « mets à jour les données ASNL » un peu plus tard ce soir pour obtenir le score final de Nantes-Nancy.</p>
+  </section>
+
+  <!-- PAGE 2 : CLASSEMENT -->
+  <section id="classement">
+    <h2>Classement Ligue 2 BKT</h2>
+    <p class="soustitre">En cours de 5<sup>e</sup> journée — 7 septembre 2026, 22h</p>
+
+    <div class="carte">
+      <table>
+        <thead>
+          <tr><th>#</th><th>Club</th><th>Pts</th><th>Diff.</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>1</td><td>AS Saint-Étienne</td><td class="pts">15</td><td>—</td></tr>
+          <tr><td>2</td><td>Stade de Reims</td><td class="pts">8</td><td>—</td></tr>
+          <tr><td>3</td><td>Montpellier HSC</td><td class="pts">8</td><td>—</td></tr>
+          <tr><td>4</td><td>Rodez AF</td><td class="pts">7</td><td>+3</td></tr>
+          <tr class="nancy"><td>5</td><td>AS Nancy Lorraine</td><td class="pts">7</td><td>+2</td></tr>
+          <tr><td>6</td><td>Annecy FC</td><td class="pts">7</td><td>—</td></tr>
+          <tr><td>…</td><td colspan="3" style="color:var(--gris);font-style:italic;">classement intermédiaire, non exhaustif</td></tr>
+          <tr><td>18</td><td>FC Nantes</td><td class="pts">1</td><td>—</td></tr>
+        </tbody>
+      </table>
+      <p class="note">Saint-Étienne a écrasé Montpellier (3-1) lors de cette 5<sup>e</sup> journée et affiche un sans-faute total : 15 points sur 15. Le match de Nancy (à Nantes) est le dernier de la journée et n'est pas encore terminé — la ligne Nancy/Nantes ci-dessus reflète donc encore la situation avant coup d'envoi. Nancy possède la meilleure défense du championnat (1 seul but encaissé en 4 journées).</p>
+    </div>
+  </section>
+
+  <!-- PAGE 3 : PALMARES ET HISTOIRE -->
+  <section id="histoire">
+    <h2>Palmarès &amp; histoire</h2>
+    <p class="soustitre">Association Sportive Nancy-Lorraine, fondée en 1967</p>
+
+    <div class="carte">
+      <div class="titres">
+        <strong>Coupe de France</strong> — 1 titre (1978)<br>
+        <strong>Coupe de la Ligue</strong> — 1 titre (2006)<br>
+        <strong>Championnat de France de Ligue 2</strong> — 5 titres (1975, 1990, 1998, 2005, 2016)<br>
+        <strong>Championnat National</strong> — 1 titre (2025)
+      </div>
+      <p class="note">Avec cinq titres de champion de Ligue 2, l'ASNL est, avec Le Havre AC, le club le plus titré de l'histoire de cette compétition.</p>
+    </div>
+
+    <div class="groupe-titre">Quelques repères</div>
+    <div class="carte">
+      <div class="ligne-histoire">
+        <div class="annee">1967</div>
+        <div class="titres">Naissance du club professionnel après la disparition du FC Nancy.</div>
+      </div>
+      <div class="ligne-histoire">
+        <div class="annee">1978</div>
+        <div class="titres">Victoire 1-0 en finale de Coupe de France contre l'OGC Nice, sur un but de <strong>Michel Platini</strong>, formé au club.</div>
+      </div>
+      <div class="ligne-histoire">
+        <div class="annee">2006</div>
+        <div class="titres">Coupe de la Ligue remportée au Stade de France face à Nice (2-1).</div>
+      </div>
+      <div class="ligne-histoire">
+        <div class="annee">2022</div>
+        <div class="titres">Relégation en Ligue 2 puis en National : le club perd son statut professionnel pour la première fois de son histoire.</div>
+      </div>
+      <div class="ligne-histoire">
+        <div class="annee">2025</div>
+        <div class="titres">Titre de champion de National sous la direction de Pablo Correa et retour en Ligue 2.</div>
+      </div>
+      <div class="ligne-histoire">
+        <div class="annee">2026</div>
+        <div class="titres">Maintien assuré en Ligue 2 ; Oswald Tanchot succède à Pablo Correa sur le banc.</div>
+      </div>
+    </div>
+
+    <div class="carte">
+      <p style="font-family:-apple-system,sans-serif;font-size:0.85rem;margin:0;">
+        Le club joue au <strong>Stade Marcel-Picot</strong> (env. 20 000 places) à Tomblaine, dans l'agglomération de Nancy. Depuis 2023, l'ASNL appartient aux hommes d'affaires Chien Lee et Krishen Sud, ce dernier étant président depuis 2024.
+      </p>
+    </div>
+  </section>
+
+  <!-- PAGE 4 : EFFECTIF -->
+  <section id="effectif">
+    <h2>Effectif</h2>
+    <p class="soustitre">Saison 2026/2027 — Entraîneur : Oswald Tanchot</p>
+
+    <div class="carte">
+      <div class="groupe-titre">Gardiens</div>
+      <div class="joueur"><span>Enzo Basilio</span><span class="age">31 ans</span></div>
+      <div class="joueur"><span>Geoffrey Lembet</span><span class="age">37 ans</span></div>
+      <div class="joueur"><span>Simon Ternynck</span><span class="age">26 ans</span></div>
+      <div class="joueur"><span>Martin Sourzac</span><span class="age">33 ans</span></div>
+
+      <div class="groupe-titre">Défenseurs</div>
+      <div class="joueur"><span>Abdelhamid El Kaoutari</span><span class="age">35 ans</span></div>
+      <div class="joueur"><span>Nicolas Saint-Ruf</span><span class="age">33 ans</span></div>
+      <div class="joueur"><span>Faitout Maouassa</span><span class="age">27 ans</span></div>
+      <div class="joueur"><span>Adrien Julloux</span><span class="age">29 ans</span></div>
+      <div class="joueur"><span>Martin Expérience</span><span class="age">26 ans</span></div>
+      <div class="joueur"><span>Elydjah Mendy</span><span class="age">25 ans</span></div>
+      <div class="joueur"><span>Nehemiah Fernandez</span><span class="age">21 ans</span></div>
+      <div class="joueur"><span>Yannis Nahounou</span><span class="age">21 ans</span></div>
+      <div class="joueur"><span>Altin Vrella</span><span class="age">26 ans</span></div>
+
+      <div class="groupe-titre">Milieux</div>
+      <div class="joueur"><span>Teddy Bouriaud</span><span class="age">29 ans</span></div>
+      <div class="joueur"><span>Maxence Carlier</span><span class="age">28 ans</span></div>
+      <div class="joueur"><span>Ćazim Suljić</span><span class="age">29 ans</span></div>
+      <div class="joueur"><span>Bakari Camara</span><span class="age">32 ans</span></div>
+      <div class="joueur"><span>Oumar Sidibé</span><span class="age">25 ans</span></div>
+      <div class="joueur"><span>Ilyes Housni</span><span class="age">—</span></div>
+
+      <div class="groupe-titre">Attaquants</div>
+      <div class="joueur"><span>Brandon Bokangu</span><span class="age">26 ans</span></div>
+      <div class="joueur"><span>Zakaria Fdaouch</span><span class="age">28 ans</span></div>
+      <div class="joueur"><span>Walid Bouabdelli</span><span class="age">25 ans</span></div>
+      <div class="joueur"><span>Adrian Dabasse</span><span class="age">32 ans</span></div>
+      <div class="joueur"><span>Cheikh Ibrahima Touré</span><span class="age">29 ans</span></div>
+      <div class="joueur"><span>Nordine Kandil</span><span class="age">arrivé d'Amiens</span></div>
+
+      <p class="note">Meilleur buteur du début de saison : Brandon Bokangu (4 buts, dont 3 à l'extérieur). Suivent Nehemiah Fernandez et Zakaria Fdaouch (2 buts chacun). Meilleur passeur : Zakaria Fdaouch (2 passes décisives). Liste non exhaustive (effectif complet : 46 joueurs, âge moyen 25,5 ans) — les postes de certains joueurs varient selon les sources.</p>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  Page personnelle et privée — dernière mise à jour : 7 septembre 2026, 22h (match Nantes-Nancy encore en cours).<br>
+  Redemandez une mise à jour un peu plus tard pour le score final.
+</footer>
+
+<script>
+  const boutons = document.querySelectorAll('nav button');
+  const sections = document.querySelectorAll('main section');
+  boutons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      boutons.forEach(b => b.classList.remove('actif'));
+      sections.forEach(s => s.classList.remove('actif'));
+      btn.classList.add('actif');
+      document.getElementById(btn.dataset.cible).classList.add('actif');
+    });
+  });
+</script>
+
+</body>
+</html>
